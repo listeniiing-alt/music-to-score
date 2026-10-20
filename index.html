@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>谱音工坊 · 免费音频转谱</title>
+<style>
+:root{--blue:#1769e8;--ink:#16345c;--muted:#647895;--line:#dce8f8;--pale:#eef6ff}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:#f8fbff}
+header{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100% - 1120px)/2));gap:16px}
+.brand{font-size:21px;font-weight:800;white-space:nowrap}.brand span{color:var(--blue)}nav{display:flex;gap:20px;color:var(--muted);font-size:14px}
+main{max-width:1120px;margin:auto;padding:34px 20px 70px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;padding:28px 0 36px}
+.pill{display:inline-block;border-radius:99px;background:#e2efff;color:var(--blue);padding:7px 12px;font-size:13px;font-weight:700}
+h1{font-size:clamp(32px,4vw,48px);line-height:1.2;margin:18px 0 14px;letter-spacing:-1px}.sub{font-size:17px;line-height:1.8;color:#4c6485;max-width:540px}
+.panel,.card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 35px #2b66a50b}
+.panel{padding:22px}.section-title{font-size:20px;margin:0 0 8px}.hint{font-size:13px;color:var(--muted);line-height:1.7}
+.drop{border:2px dashed #a9cafa;border-radius:16px;background:#f6faff;text-align:center;padding:25px 14px;margin:15px 0;cursor:pointer}
+.drop strong{display:block;margin:9px 0}.drop input{max-width:100%;font-size:13px}
+button,.button{border:0;border-radius:12px;padding:12px 17px;background:var(--blue);color:white;font-weight:700;cursor:pointer;font-size:14px}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:white;color:var(--blue);border:1px solid #a9cafa}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.status{background:#f0f6ff;border-radius:12px;padding:12px;font-size:13px;line-height:1.6;color:#36577e;margin-top:12px;overflow-wrap:anywhere}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:10px 0 28px}.step{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;font-size:14px}.step b{display:block;margin:8px 0}.step .num{color:var(--blue);font-size:21px;font-weight:800}
+.workspace{margin-top:26px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:14px 0}select,input[type=text]{border:1px solid var(--line);border-radius:10px;padding:10px;background:white;color:var(--ink)}
+.sheet{min-height:200px;background:white;border:1px solid var(--line);border-radius:16px;padding:18px;overflow:auto}.empty{color:#8294ad;text-align:center;padding:50px 10px}.staff{width:100%;min-width:550px;height:auto;display:block}.note{cursor:pointer;fill:#173b6b}.note.selected{fill:#f07838}.legend{font-size:12px;color:var(--muted);margin-top:9px}.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}.field input{width:100%}
+footer{text-align:center;color:#8092ab;font-size:12px;padding:28px}
+@media(max-width:760px){nav{display:none}.hero{grid-template-columns:1fr;padding-top:10px}.steps{grid-template-columns:repeat(2,1fr)}main{padding-top:20px}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>♫</span> 谱音工坊</div><nav><span>首页</span><span>音频转谱</span><span>在线编辑</span><span>使用说明</span></nav><span class="pill">免费体验版</span></header>
+<main>
+<section class="hero">
+<div><span class="pill">让音乐变成看得见的谱子</span><h1>音频转谱子<br>让灵感落在纸上</h1><div class="sub">上传音频，尝试生成乐谱，并在线调整音符。支持五线谱预览与简谱文本，逐步完善多乐器识别能力。</div><div class="actions"><button onclick="document.querySelector('#audio').click()">↑ 上传音频开始</button><button class="secondary" onclick="document.querySelector('#workspace').scrollIntoView({behavior:'smooth'})">查看谱面编辑器</button></div><p class="hint">第一版可直接部署。AI 识别需要配置真实的推理服务，页面不会把演示结果伪装成真实识别。</p></div>
+<div class="panel"><h2 class="section-title">开始你的转谱任务</h2><p class="hint">选择音频文件后，可试听、查看文件信息。支持浏览器能解码的音频格式；上传文件不会自动发送到服务器。</p>
+<label class="drop" for="audio"><div style="font-size:34px;color:#1769e8">♫</div><strong>选择或拖入音频文件</strong><span class="hint">建议先用 30 秒以内片段测试</span><br><input id="audio" type="file" accept="audio/*"></label>
+<audio id="player" controls style="width:100%;display:none"></audio><div id="fileInfo" class="status">尚未选择音频。</div>
+<div class="actions"><button id="analyze" disabled>开始 AI 转谱</button><button id="clear" class="secondary">清空</button></div>
+<div id="status" class="status">状态：等待上传音频。当前版本尚未连接 AI 推理接口。</div></div>
+</section>
+<section class="steps">
+<div class="step"><span class="num">01</span><b>上传音频</b><span class="hint">选择本地歌曲文件</span></div>
+<div class="step"><span class="num">02</span><b>AI 分析</b><span class="hint">需配置真实识别后端</span></div>
+<div class="step"><span class="num">03</span><b>修改谱面</b><span class="hint">点击音符可选中并调整</span></div>
+<div class="step"><span class="num">04</span><b>导出结果</b><span class="hint">下载简谱文本或谱面 SVG</span></div>
+</section>
+<section id="workspace" class="workspace">
+<h2 class="section-title">在线谱面编辑器</h2><p class="hint">此处是可交互的示例谱面，不是你上传歌曲的 AI 识别结果。AI 接口接通后，才会显示真实识别出的音符。</p>
+<div class="toolbar"><label class="field">谱面类型<select id="notation"><option value="staff">五线谱预览</option><option value="jianpu">简谱文本</option></select></label><label class="field">音符音高<select id="pitch"><option value="C4">C4 · do</option><option value="D4">D4 · re</option><option value="E4">E4 · mi</option><option value="F4">F4 · fa</option><option value="G4">G4 · sol</option><option value="A4">A4 · la</option><option value="B4">B4 · si</option><option value="C5">C5 · do</option></select></label><label class="field">节拍<select id="duration"><option value="quarter">四分音符</option><option value="half">二分音符</option><option value="eighth">八分音符</option></select></label><button id="apply" class="secondary">修改选中音符</button><button id="add" class="secondary">添加音符</button><button id="remove" class="secondary">删除选中音符</button></div>
+<div id="sheet" class="sheet"><div class="empty">谱面示例加载中……</div></div><div class="legend">操作：点击音符选中，再选择音高和时值并点击“修改选中音符”。</div>
+<div class="actions"><button id="exportTxt">导出简谱文本</button><button id="exportSvg" class="secondary">导出谱面 SVG</button><button id="save" class="secondary">保存到本机浏览器</button><button id="load" class="secondary">读取本机保存</button></div><div id="editStatus" class="hint" style="margin-top:10px"></div>
+</section>
+<section class="workspace panel"><h2 class="section-title">关于 AI 识别</h2><p class="hint">完整歌曲的多乐器转谱需要音频分离、音高与起止时间估计、节奏量化和乐谱排版。此静态版本尚未包含这些模型，因此“开始 AI 转谱”会明确提示尚未配置服务。不要把示例音符当成识别结果。后续可部署独立 Python 推理 API，再由本页调用。</p></section>
+</main><footer>谱音工坊 · 免费体验版 · 音频在本地浏览器预览，不会自动上传</footer>
+<script>
+const $=s=>document.querySelector(s);
+let file=null, selected=0;
+let notes=[{p:'C4',d:'quarter'},{p:'D4',d:'quarter'},{p:'E4',d:'quarter'},{p:'G4',d:'half'},{p:'E4',d:'quarter'},{p:'D4',d:'quarter'},{p:'C4',d:'half'},{p:'G4',d:'quarter'}];
+const semis={C4:0,D4:1,E4:2,F4:3,G4:4,A4:5,B4:6,C5:7};
+const jp={C4:'1',D4:'2',E4:'3',F4:'4',G4:'5',A4:'6',B4:'7',C5:'1̇'};
+const durations={quarter:1,half:2,eighth:.5};
+function setStatus(t){$('#status').textContent=t}
+$('#audio').addEventListener('change',e=>{file=e.target.files[0];if(!file)return;$('#player').src=URL.createObjectURL(file);$('#player').style.display='block';$('#fileInfo').textContent=`已选择：${file.name} · ${(file.size/1024/1024).toFixed(2)} MB · ${file.type||'音频文件'}`;$('#analyze').disabled=false;setStatus('音频已在本机载入，可试听。AI 识别服务尚未配置，因此现在不会生成虚假的识别结果。')});
+$('#clear').onclick=()=>{file=null;$('#audio').value='';$('#player').removeAttribute('src');$('#player').style.display='none';$('#fileInfo').textContent='尚未选择音频。';$('#analyze').disabled=true;setStatus('状态：等待上传音频。')};
+$('#analyze').onclick=()=>setStatus('尚未连接 AI 转谱后端。当前部署只提供音频选择与试听、示例谱面编辑和导出。接入真实模型 API 后，才能分析这首歌曲。');
+function render(){const host=$('#sheet');if($('#notation').value==='jianpu'){host.innerHTML=`<div style="font:24px/2.2 Georgia,serif;white-space:pre-wrap">1  2  3  5̅  3  2  1̅  5\n${notes.map(n=>jp[n.p]||'1').join('　')}<div class="hint">示例简谱 · 点击下方音符列表中的音符进行选择</div></div><div>${notes.map((n,i)=>`<button class="secondary" style="margin:4px" data-i="${i}">${i+1}. ${n.p}</button>`).join('')}</div>`;host.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{selected=+b.dataset.i;$('#pitch').value=notes[selected].p;$('#editStatus').textContent=`已选择第 ${selected+1} 个示例音符`;});return}
+const ys=notes.map(n=>({C4:145,D4:135,E4:125,F4:120,G4:110,A4:100,B4:90,C5:80}[n.p]||125));
+let svg=`<svg class="staff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.max(600,notes.length*65+70)} 205"><rect width="100%" height="100%" fill="white"/><text x="15" y="35" font-size="17" fill="#173b6b">示例旋律（非 AI 识别结果）</text>`;
+for(let i=0;i<5;i++)svg+=`<line x1="22" y1="${85+i*12}" x2="${Math.max(580,notes.length*65+45)}" y2="${85+i*12}" stroke="#8ca1bd" stroke-width="1"/>`;
+svg+=`<text x="27" y="138" font-size="54" fill="#173b6b">𝄞</text>`;
+notes.forEach((n,i)=>{let x=100+i*60,y=ys[i];svg+=`<g data-note="${i}" class="note ${i===selected?'selected':''}"><ellipse cx="${x}" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 ${x} ${y})"/><line x1="${x+7}" y1="${y}" x2="${x+7}" y2="${y-28}" stroke="currentColor" stroke-width="1.6"/><text x="${x-10}" y="${y+25}" font-size="10" fill="#607896">${n.p}</text></g>`});
+svg+='</svg>';host.innerHTML=svg;host.querySelectorAll('[data-note]').forEach(g=>g.onclick=()=>{selected=+g.dataset.note;$('#pitch').value=notes[selected].p;render();$('#editStatus').textContent=`已选中第 ${selected+1} 个示例音符。`})}
+$('#notation').onchange=render;
+$('#apply').onclick=()=>{if(!notes[selected])return;notes[selected].p=$('#pitch').value;notes[selected].d=$('#duration').value;render();$('#editStatus').textContent='示例音符已修改。注意：这不是上传歌曲的识别结果。'};
+$('#add').onclick=()=>{notes.push({p:$('#pitch').value,d:$('#duration').value});selected=notes.length-1;render();$('#editStatus').textContent='已添加示例音符。'};
+$('#remove').onclick=()=>{if(!notes.length)return;notes.splice(selected,1);selected=Math.max(0,Math.min(selected,notes.length-1));render();$('#editStatus').textContent='已删除选中音符。'};
+function download(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+$('#exportTxt').onclick=()=>download('示例简谱.txt',notes.map(n=>jp[n.p]||'1').join('　')+'\n\n提示：这是编辑器示例音符，不是 AI 识别结果。','text/plain;charset=utf-8');
+$('#exportSvg').onclick=()=>{const svg=$('#sheet svg');if(!svg){alert('请切换到五线谱预览后导出。');return}download('示例谱面.svg',svg.outerHTML,'image/svg+xml;charset=utf-8')};
+$('#save').onclick=()=>{localStorage.setItem('musicToScoreNotes',JSON.stringify(notes));$('#editStatus').textContent='已保存到当前浏览器。清除浏览器网站数据后可能丢失。'};
+$('#load').onclick=()=>{try{const n=JSON.parse(localStorage.getItem('musicToScoreNotes'));if(!Array.isArray(n))throw 0;notes=n;selected=0;render();$('#editStatus').textContent='已读取本机保存的示例谱面。'}catch(e){$('#editStatus').textContent='没有找到有效的本机保存。'}};
+render();
+</script>
+</body></html>
